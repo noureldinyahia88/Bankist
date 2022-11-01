@@ -26,7 +26,14 @@ const account4 = {
     pin: 4444,
 };
 
-const accounts = [account1, account2, account3, account4];
+const account5 = {
+    owner: 'Nour Thrwat',
+    movements: [830, 5000, 760, 150, 920],
+    interestRate: 1,
+    pin: 5555,
+};
+
+const accounts = [account1, account2, account3, account4,account5];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -70,9 +77,10 @@ const displayMovements = function(movements) {
 }
 
 
-const clacDisplayBalance = function (movements) {
-    const balance = movements.reduce((acc, mov) => acc + mov,0)
-    labelBalance.textContent = `${balance} €`
+const clacDisplayBalance = function (acc) {
+    acc.balance = acc.movements.reduce((acc, mov) =>
+    acc + mov,0)
+    labelBalance.textContent = `${acc.balance} €`
 }
 
 
@@ -89,6 +97,17 @@ const clacDisplaysummmary= function(acc){
 
 
 //***************************** */ login************************************************
+
+// UpdateUI
+const updateUI = function(acc) {
+    //Display Movements
+    displayMovements(acc.movements)
+    //Clac DisplayBalance
+    clacDisplayBalance(acc)
+    //ClacDisplay Summmary
+    clacDisplaysummmary(acc)
+}
+
 
 let currentAccount;
 
@@ -110,14 +129,26 @@ btnLogin.addEventListener('click', function (e) {
         inputLoginUsername.value = inputLoginPin.value = ''
         inputLoginPin.blur();
 
-        //Display Movements
-        displayMovements(currentAccount.movements)
-        //Clac DisplayBalance
-        clacDisplayBalance(currentAccount.movements)
-        //ClacDisplay Summmary
-        clacDisplaysummmary(currentAccount)
+        // UpdateUI
+        updateUI(currentAccount)
     }
 });
+
+btnTransfer.addEventListener('click',(e)=>{
+    e.preventDefault()
+    const amount = Number(inputTransferAmount.value)
+    const receiverAcc = accounts.find(acc => acc.username === inputTransferTo.value)
+    inputTransferAmount.value = inputTransferTo.value = ''
+    
+    if(amount>0 && receiverAcc && currentAccount.balance>=amount && receiverAcc?.username !== currentAccount.username){
+        currentAccount.movements.push(-amount)
+        receiverAcc.movements.push(amount)
+        // UpdateUI
+        updateUI(currentAccount)
+    } else {
+        window.alert('Not Valid')
+    }
+})
 
 // Create Usernames
 const createUsernames = function (accs) {
