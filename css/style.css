@@ -50,7 +50,6 @@
     border: 1px solid #fff;
     transition: all 0.3s;
   }
-  
   .login__input:focus {
     outline: none;
     border: 1px solid #ccc;
@@ -76,7 +75,25 @@
     outline: none;
     color: #777;
   }
-  
+.wrongpasswordbox{
+    position: relative;
+    margin: 4rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 75px;
+    padding: 20px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    opacity: 0;
+    transition: all 1s;
+}
+.wrongpin{
+    color: rgb(216, 118, 118);
+    font-size: 30px;
+    font-weight: 400;
+    transition: all 1s;
+}
   /* MAIN */
 .app{
     position: relative;

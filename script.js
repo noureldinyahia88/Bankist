@@ -61,6 +61,7 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+const wrongpasswordbox = document.querySelector('.wrongpasswordbox')
 
 const displayMovements = function(movements) {
     containerMovements.innerHTML = '';
@@ -107,7 +108,9 @@ const updateUI = function(acc) {
     //ClacDisplay Summmary
     clacDisplaysummmary(acc)
 }
-
+// function removeWrongbox() {
+//     wrongpasswordbox.style.opacity=0
+// }
 
 let currentAccount;
 
@@ -131,6 +134,12 @@ btnLogin.addEventListener('click', function (e) {
 
         // UpdateUI
         updateUI(currentAccount)
+    } else {
+        wrongpasswordbox.style.opacity=100
+        setTimeout(() => {
+            wrongpasswordbox.style.opacity=0
+        }, 3000)
+        inputLoginUsername.value = inputLoginPin.value = ''
     }
 });
 
@@ -148,6 +157,17 @@ btnTransfer.addEventListener('click',(e)=>{
     } else {
         window.alert('Not Valid')
     }
+})
+
+btnLoan.addEventListener('click',(e)=>{
+    e.preventDefault()
+    const amount = Number(inputLoanAmount.value)
+
+    if(amount >= 0 && currentAccount.movements.some(mev=>mev >= amount*0.1)){
+        currentAccount.movements.push(amount)
+        updateUI(currentAccount)
+    }
+    inputLoanAmount.value = ''
 })
 
 btnClose.addEventListener('click',(e)=>{
