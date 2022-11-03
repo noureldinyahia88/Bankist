@@ -2,6 +2,7 @@ const account1 = {
     owner: 'Jonas Schmedtmann',
     movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
     interestRate: 1.2, // %
+    theNumberlaon: 1,
     pin: 1111,
 };
 
@@ -9,6 +10,7 @@ const account2 = {
     owner: 'Jessica Davis',
     movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
     interestRate: 1.5,
+    theNumberlaon: 1,
     pin: 2222,
 };
 
@@ -16,6 +18,7 @@ const account3 = {
     owner: 'Steven Thomas Williams',
     movements: [200, -200, 340, -300, -20, 50, 400, -460],
     interestRate: 0.7,
+    theNumberlaon: 1,
     pin: 3333,
 };
 
@@ -23,6 +26,7 @@ const account4 = {
     owner: 'Sarah Smith',
     movements: [430, 1000, 700, 50, 90],
     interestRate: 1,
+    theNumberlaon: 1,
     pin: 4444,
 };
 
@@ -30,6 +34,7 @@ const account5 = {
     owner: 'Nour Thrwat',
     movements: [830, 5000, 760, 150, 920],
     interestRate: 1,
+    theNumberlaon: 1,
     pin: 5555,
 };
 
@@ -63,9 +68,10 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 const wrongpasswordbox = document.querySelector('.wrongpasswordbox')
 
-const displayMovements = function(movements) {
+const displayMovements = function(movements, sort=false) {
     containerMovements.innerHTML = '';
-    movements.forEach((mov, i)=>{
+    const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+    movs.forEach((mov, i)=>{
         const type = mov > 0 ? "deposit" : "withdrawal"
         const html = `
         <div class="movements__row">
@@ -159,12 +165,14 @@ btnTransfer.addEventListener('click',(e)=>{
     }
 })
 
+
 btnLoan.addEventListener('click',(e)=>{
     e.preventDefault()
     const amount = Number(inputLoanAmount.value)
 
-    if(amount >= 0 && currentAccount.movements.some(mev=>mev >= amount*0.1)){
+    if(amount >= 0 && currentAccount.theNumberlaon <= 1 && currentAccount.movements.some(mev=>mev >= amount*0.1)){
         currentAccount.movements.push(amount)
+        currentAccount.theNumberlaon++
         updateUI(currentAccount)
     }
     inputLoanAmount.value = ''
@@ -180,6 +188,13 @@ btnClose.addEventListener('click',(e)=>{
     }
     containerApp.style.opacity = 0;
     inputCloseUsername.value = inputClosePin.value = ''
+})
+
+let sorted = false
+btnSort.addEventListener('click',(e)=>{
+    e.preventDefault()
+    displayMovements(currentAccount.movements, !sorted)
+    sorted = !sorted
 })
 
 // Create Usernames
