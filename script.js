@@ -76,7 +76,7 @@ const displayMovements = function(movements, sort=false) {
         const html = `
         <div class="movements__row">
                 <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-                <div class="movements__value">${mov} €</div>
+                <div class="movements__value">${mov.toFixed(2)} €</div>
             </div>
         `;
         containerMovements.insertAdjacentHTML('afterbegin',html)
@@ -87,19 +87,19 @@ const displayMovements = function(movements, sort=false) {
 const clacDisplayBalance = function (acc) {
     acc.balance = acc.movements.reduce((acc, mov) =>
     acc + mov,0)
-    labelBalance.textContent = `${acc.balance} €`
+    labelBalance.textContent = `${acc.balance.toFixed(2)} €`
 }
 
 
 const clacDisplaysummmary= function(acc){
     const incoms = acc.movements.filter(mov=> mov > 0).reduce((curr, mov)=>curr+mov,0)
-    labelSumIn.textContent = `${incoms} €`
+    labelSumIn.textContent = `${incoms.toFixed(2)} €`
 
     const out = acc.movements.filter(mov=> mov < 0).reduce((curr, mov)=>curr+mov,0)
     labelSumOut.textContent = `${Math.abs(out)} €`
 
     const interest = acc.movements.filter(mov=> mov > 0).map(deposite=>(deposite*acc.interestRate)/100).reduce((curr, int)=> curr+int)
-    labelSumInterest.textContent = `${interest} €`
+    labelSumInterest.textContent = `${interest.toFixed(2)} €`
 }
 
 
@@ -168,7 +168,7 @@ btnTransfer.addEventListener('click',(e)=>{
 
 btnLoan.addEventListener('click',(e)=>{
     e.preventDefault()
-    const amount = Number(inputLoanAmount.value)
+    const amount = Math.floor(inputLoanAmount.value)
 
     if(amount >= 0 && currentAccount.theNumberlaon <= 1 && currentAccount.movements.some(mev=>mev >= amount*0.1)){
         currentAccount.movements.push(amount)
@@ -216,33 +216,6 @@ createUsernames(accounts)
 /////////////////////////////////////////////////
 // LECTURES
 
-const currencies = new Map([
-    ['USD', 'United States dollar'],
-    ['EUR', 'Euro'],
-    ['GBP', 'Pound sterling'],
-]);
-
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
-
-const data1 = [5,2,4,1,15,8,3]
-const data2 = [16,6,10,5,6,1,4]
-
-const humanAge = data1.map((x)=>{
-    if(x<=2){
-        return 2 * x
-    } else if(x>2) {
-        return 16+x*4
-    }
-})
-const under18 = humanAge.filter((x)=>{
-    return x > 18
-})
-let sum
-const average = under18.forEach((x)=>{
-    sum += x
-})
-const av = sum / under18.length
-console.log(av)
 
 // 'use strict';
 
