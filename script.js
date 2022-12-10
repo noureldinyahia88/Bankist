@@ -1,44 +1,43 @@
 const account1 = {
     owner: 'Jonas Schmedtmann',
-    movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+    movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
     interestRate: 1.2, // %
-    theNumberlaon: 1,
     pin: 1111,
+    movementsDates: [
+        '2019-11-18T21:31:17.178Z',
+        '2019-12-23T07:42:02.383Z',
+        '2020-01-28T09:15:04.904Z',
+        '2020-04-01T10:17:24.185Z',
+        '2020-05-08T14:11:59.604Z',
+        '2020-05-27T17:01:17.194Z',
+        '2020-07-11T23:36:17.929Z',
+        '2020-07-12T10:51:36.790Z',
+    ],
+    currency: 'EUR',
+    locale: 'pt-PT', // de-DE
 };
 
 const account2 = {
     owner: 'Jessica Davis',
     movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
     interestRate: 1.5,
-    theNumberlaon: 1,
     pin: 2222,
+
+    movementsDates: [
+        '2022-12-01T13:15:33.035Z',
+        '2019-11-30T09:48:16.867Z',
+        '2019-12-25T06:04:23.907Z',
+        '2020-01-25T14:18:46.235Z',
+        '2020-02-05T16:33:06.386Z',
+        '2020-04-10T14:43:26.374Z',
+        '2020-06-25T18:49:59.371Z',
+        '2020-07-26T12:01:20.894Z',
+    ],
+    currency: 'USD',
+    locale: 'en-US',
 };
 
-const account3 = {
-    owner: 'Steven Thomas Williams',
-    movements: [200, -200, 340, -300, -20, 50, 400, -460],
-    interestRate: 0.7,
-    theNumberlaon: 1,
-    pin: 3333,
-};
-
-const account4 = {
-    owner: 'Sarah Smith',
-    movements: [430, 1000, 700, 50, 90],
-    interestRate: 1,
-    theNumberlaon: 1,
-    pin: 4444,
-};
-
-const account5 = {
-    owner: 'Nour Thrwat',
-    movements: [830, 5000, 760, 150, 920],
-    interestRate: 1,
-    theNumberlaon: 1,
-    pin: 5555,
-};
-
-const accounts = [account1, account2, account3, account4,account5];
+const accounts = [account1, account2];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -68,38 +67,86 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 const wrongpasswordbox = document.querySelector('.wrongpasswordbox')
 
-const displayMovements = function(movements, sort=false) {
+let currentAccount , timer;
+
+const formatMovementDate = function(date, locale) {
+        
+        const calcDaysPassed = (date1, date2) => Math.round(Math.abs(date1 - date2) / (1000 * 60 * 60 * 24));
+        const dayspassed = calcDaysPassed(new Date(), date)
+
+        if(dayspassed === 0) return 'Today';
+        if(dayspassed === 1) return 'Yesterday';
+        if(dayspassed <= 7) return `${dayspassed} days ago`;
+
+        return new Intl.DateTimeFormat(locale).format(date);
+}
+const formatcur = function(value, locale, currency) {
+    return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currency,
+    }).format(value);
+}
+
+const displayMovements = function(acc, sort=false) {
     containerMovements.innerHTML = '';
-    const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+    const movs = sort ? acc.movements.slice().sort((a, b) => a - b) : acc.movements;
+
     movs.forEach((mov, i)=>{
         const type = mov > 0 ? "deposit" : "withdrawal"
+
+        const date = new Date(acc.movementsDates[i])
+        const displayDate = formatMovementDate(date, acc.locale)
+
+        const formattedMov = formatcur(mov, acc.locale, acc.currency);
+
         const html = `
         <div class="movements__row">
                 <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
+                <div class="movements__date">${displayDate}</div>
                 <div class="movements__value">${mov.toFixed(2)} €</div>
             </div>
         `;
         containerMovements.insertAdjacentHTML('afterbegin',html)
     })
 }
+// **********************startLogOutTimer**************************
+const startLogOutTimer = function(){
+    const tick = function(){
+        const min = String(Math.trunc(time / 60)).padStart(2, 0);
+        const sec = String(time % 60).padStart(2, 0);
+        labelTimer.textContent = `${min}:${sec}`;
+        
+        if(time === 0) {
+            clearInterval(timer)
+            labelWelcome.textContent = "Log in to get started";
+            containerApp.style.opacity = 0;
+        }
+        time--;
+    };
+    let time = 120;
+    tick()
+    const timer = setInterval(tick,1000)
 
+    return timer;
+};
 
 const clacDisplayBalance = function (acc) {
     acc.balance = acc.movements.reduce((acc, mov) =>
     acc + mov,0)
-    labelBalance.textContent = `${acc.balance.toFixed(2)} €`
+
+    labelBalance.textContent = formatcur(acc.balance, acc.locale, acc.currency);
 }
 
 
 const clacDisplaysummmary= function(acc){
     const incoms = acc.movements.filter(mov=> mov > 0).reduce((curr, mov)=>curr+mov,0)
-    labelSumIn.textContent = `${incoms.toFixed(2)} €`
+    labelSumIn.textContent = formatcur(incoms, acc.locale, acc.currency);
 
     const out = acc.movements.filter(mov=> mov < 0).reduce((curr, mov)=>curr+mov,0)
-    labelSumOut.textContent = `${Math.abs(out)} €`
+    labelSumOut.textContent = formatcur(Math.abs(out), acc.locale, acc.currency);
 
     const interest = acc.movements.filter(mov=> mov > 0).map(deposite=>(deposite*acc.interestRate)/100).reduce((curr, int)=> curr+int)
-    labelSumInterest.textContent = `${interest.toFixed(2)} €`
+    labelSumInterest.textContent = formatcur(interest, acc.locale, acc.currency);
 }
 
 
@@ -108,17 +155,19 @@ const clacDisplaysummmary= function(acc){
 // UpdateUI
 const updateUI = function(acc) {
     //Display Movements
-    displayMovements(acc.movements)
+    displayMovements(acc)
     //Clac DisplayBalance
     clacDisplayBalance(acc)
     //ClacDisplay Summmary
     clacDisplaysummmary(acc)
 }
-// function removeWrongbox() {
-//     wrongpasswordbox.style.opacity=0
-// }
 
-let currentAccount;
+
+// fake login
+// currentAccount = account1;
+// updateUI(currentAccount)
+// containerApp.style.opacity = 100;
+
 
 btnLogin.addEventListener('click', function (e) {
   // Prevent form from submitting
@@ -134,9 +183,24 @@ btnLogin.addEventListener('click', function (e) {
         currentAccount.owner.split(' ')[0]
         }`;
         containerApp.style.opacity = 100;
+        // Experimenting API
+        const now = new Date();
+        const options = {
+            hour: 'numeric',
+            minute: 'numeric',
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric',
+        }
+        const locale = navigator.language
+        labelDate.textContent = new Intl.DateTimeFormat(currentAccount.locale, options).format(now)
+
         // Clear input fields
         inputLoginUsername.value = inputLoginPin.value = ''
         inputLoginPin.blur();
+
+        if (timer) clearInterval(timer);
+        timer = startLogOutTimer();
 
         // UpdateUI
         updateUI(currentAccount)
@@ -158,8 +222,16 @@ btnTransfer.addEventListener('click',(e)=>{
     if(amount>0 && receiverAcc && currentAccount.balance>=amount && receiverAcc?.username !== currentAccount.username){
         currentAccount.movements.push(-amount)
         receiverAcc.movements.push(amount)
+
+        // Add transfer date 
+        currentAccount.movementsDates.push(new Date().toISOString());
+        receiverAcc.movementsDates.push(new Date().toISOString());
         // UpdateUI
         updateUI(currentAccount)
+
+        //Reset timer
+        clearInterval(timer);
+        timer = startLogOutTimer();
     } else {
         window.alert('Not Valid')
     }
@@ -170,10 +242,17 @@ btnLoan.addEventListener('click',(e)=>{
     e.preventDefault()
     const amount = Math.floor(inputLoanAmount.value)
 
-    if(amount >= 0 && currentAccount.theNumberlaon <= 1 && currentAccount.movements.some(mev=>mev >= amount*0.1)){
-        currentAccount.movements.push(amount)
-        currentAccount.theNumberlaon++
-        updateUI(currentAccount)
+    if(amount >= 0 && currentAccount.movements.some(mev=>mev >= amount*0.1)){
+        setTimeout(function() {
+            currentAccount.movements.push(amount)
+            currentAccount.theNumberlaon++
+            // Add loan date
+            currentAccount.movementsDates.push(new Date().toISOString());
+            // UpdateUI
+            updateUI(currentAccount)
+            clearInterval(timer);
+        timer = startLogOutTimer();
+        }, 3000)
     }
     inputLoanAmount.value = ''
 })
@@ -209,42 +288,6 @@ const createUsernames = function (accs) {
 }
 createUsernames(accounts)
 
+const calcDaysPassed = (date1, date2) => Math.abs(date1 - date2) / (1000 * 60 * 60 * 24);
 
-
-
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
-
-
-// 'use strict';
-
-///////////////////////////////////////
-// Modal window
-
-// const modal = document.querySelector('.modal');
-// const overlay = document.querySelector('.overlay');
-// const btnCloseModal = document.querySelector('.btn--close-modal');
-// const btnsOpenModal = document.querySelectorAll('.btn--show-modal');
-
-// const openModal = function () {
-// modal.classList.remove('hidden');
-// overlay.classList.remove('hidden');
-// };
-
-// const closeModal = function () {
-// modal.classList.add('hidden');
-// overlay.classList.add('hidden');
-// };
-
-// for (let i = 0; i < btnsOpenModal.length; i++)
-// btnsOpenModal[i].addEventListener('click', openModal);
-
-// btnCloseModal.addEventListener('click', closeModal);
-// overlay.addEventListener('click', closeModal);
-
-// document.addEventListener('keydown', function (e) {
-// if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-//     closeModal();
-// }
-// });
+const days1 = calcDaysPassed()
